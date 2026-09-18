@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Responsive Layouts — Sidebar, Box Model, Flexbox Blog</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F7F7F5;
+    --surface: #FFFFFF;
+    --surface-2: #EFF1F8;
+    --ink: #171A21;
+    --muted: #5B6070;
+    --accent: #3452E1;
+    --accent-ink: #FFFFFF;
+    --accent-soft: #E8ECFC;
+    --border: #D8DBE3;
+    --code-bg: #14161F;
+    --code-ink: #E7E9F5;
+    --code-comment: #7C8194;
+    --margin-color: #F4B860;
+    --border-color-demo: #3452E1;
+    --padding-color: #8FD3B6;
+    --content-color: #FFFFFF;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #12141C;
+      --surface: #1B1E29;
+      --surface-2: #232635;
+      --ink: #EDEEF3;
+      --muted: #9BA0B4;
+      --accent: #7C90FF;
+      --accent-ink: #12141C;
+      --accent-soft: #262B45;
+      --border: #313548;
+      --code-bg: #0C0D13;
+      --code-ink: #E7E9F5;
+      --code-comment: #6B7086;
+      --content-color: #1B1E29;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #12141C;
+    --surface: #1B1E29;
+    --surface-2: #232635;
+    --ink: #EDEEF3;
+    --muted: #9BA0B4;
+    --accent: #7C90FF;
+    --accent-ink: #12141C;
+    --accent-soft: #262B45;
+    --border: #313548;
+    --code-bg: #0C0D13;
+    --code-ink: #E7E9F5;
+    --code-comment: #6B7086;
+    --content-color: #1B1E29;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, .display {
+    font-family: 'Space Grotesk', 'Inter', sans-serif;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  .wrap {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 48px 20px 96px;
+  }
+
+  header.page-head {
+    margin-bottom: 56px;
+  }
+
+  header.page-head h1 {
+    font-size: clamp(28px, 4.5vw, 40px);
+    margin: 0 0 14px;
+    line-height: 1.15;
+  }
+
+  header.page-head p {
+    color: var(--muted);
+    font-size: 16px;
+    max-width: 60ch;
+    margin: 0;
+  }
+
+  section.lesson {
+    margin-bottom: 72px;
+    padding-top: 40px;
+    border-top: 1px solid var(--border);
+  }
+
+  section.lesson:first-of-type {
+    border-top: none;
+    padding-top: 0;
+  }
+
+  .lesson-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--accent);
+    margin: 0 0 8px;
+  }
+
+  section.lesson h2 {
+    font-size: 24px;
+    margin: 0 0 10px;
+  }
+
+  section.lesson > p.intro {
+    color: var(--muted);
+    max-width: 62ch;
+    margin: 0 0 24px;
+    font-size: 15px;
+  }
+
+  .hint {
+    font-size: 13px;
+    color: var(--muted);
+    margin: 10px 0 0;
+  }
+
+  .hint::before {
+    content: "↔ ";
+  }
+
+  /* ---------- code panel ---------- */
+  details.code {
+    margin-top: 18px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    background: var(--surface);
+  }
+
+  details.code summary {
+    cursor: pointer;
+    padding: 12px 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--muted);
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    user-select: none;
+  }
+
+  details.code summary::-webkit-details-marker { display: none; }
+
+  details.code summary::before {
+    content: "+";
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-size: 12px;
+    color: var(--accent);
+  }
+
+  details.code[open] summary::before { content: "–"; }
+
+  details.code pre {
+    margin: 0;
+    padding: 18px 16px 20px;
+    background: var(--code-bg);
+    color: var(--code-ink);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    line-height: 1.6;
+    overflow-x: auto;
+  }
+
+  details.code .cm { color: var(--code-comment); }
+
+  /* ================= SECTION 1: SIDEBAR ================= */
+  .sidebar-demo {
+    display: flex;
+    min-height: 220px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .sidebar-demo .side {
+    flex: 0 0 160px;
+    background: var(--surface-2);
+    padding: 18px 16px;
+  }
+
+  .sidebar-demo .side .brand {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 14px;
+  }
+
+  .sidebar-demo .side a {
+    display: block;
+    font-size: 13px;
+    color: var(--muted);
+    text-decoration: none;
+    padding: 7px 0;
+    border-bottom: 1px solid transparent;
+  }
+
+  .sidebar-demo .side a.active {
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  .sidebar-demo .main {
+    flex: 1 1 auto;
+    background: var(--surface);
+    padding: 20px 22px;
+  }
+
+  .sidebar-demo .main h3 {
+    margin: 0 0 8px;
+    font-size: 16px;
+  }
+
+  .sidebar-demo .main p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 13.5px;
+  }
+
+  @media (max-width: 560px) {
+    .sidebar-demo {
+      flex-direction: column;
+    }
+    .sidebar-demo .side {
+      flex: 0 0 auto;
+      display: flex;
+      gap: 14px;
+      align-items: center;
+      overflow-x: auto;
+    }
+    .sidebar-demo .side .brand { margin-bottom: 0; }
+    .sidebar-demo .side a { padding: 4px 0; white-space: nowrap; }
+  }
+
+  /* ================= SECTION 2: PRODUCT CARD / BOX MODEL ================= */
+  .box-model-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 22px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .box-model-toggle input {
+    accent-color: var(--accent);
+    width: 15px;
+    height: 15px;
+  }
+
+  .card-stage {
+    display: flex;
+    justify-content: center;
+    padding: 20px 0 8px;
+  }
+
+  .product-card {
+    width: 240px;
+    background: var(--content-color, var(--surface));
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    margin: 18px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    transition: outline .15s ease;
+  }
+
+  .product-card .thumb {
+    width: 100%;
+    height: 110px;
+    border-radius: 6px;
+    background: linear-gradient(135deg, var(--accent-soft), var(--surface-2));
+    margin-bottom: 12px;
+  }
+
+  .product-card h4 {
+    margin: 0 0 4px;
+    font-size: 15px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+  }
+
+  .product-card .price {
+    color: var(--accent);
+    font-weight: 600;
+    font-size: 14px;
+    margin: 0 0 12px;
+  }
+
+  .product-card button {
+    width: 100%;
+    padding: 8px 0;
+    border: none;
+    border-radius: 6px;
+    background: var(--accent);
+    color: var(--accent-ink);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  /* box model reveal — pure CSS via :checked */
+  #box-toggle { position: absolute; opacity: 0; pointer-events: none; }
+
+  #box-toggle:checked ~ .card-stage .product-card {
+    outline: 18px solid color-mix(in srgb, var(--margin-color) 55%, transparent);
+    outline-offset: -18px;
+    position: relative;
+  }
+
+  #box-toggle:checked ~ .card-stage .product-card {
+    border-width: 3px;
+    border-color: var(--border-color-demo);
+  }
+
+  #box-toggle:checked ~ .card-stage .product-card::before {
+    content: "";
+    position: absolute;
+    inset: 3px;
+    border: 16px solid color-mix(in srgb, var(--padding-color) 45%, transparent);
+    pointer-events: none;
+    border-radius: 6px;
+  }
+
+  .legend {
+    display: none;
+    justify-content: center;
+    gap: 18px;
+    flex-wrap: wrap;
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  #box-toggle:checked ~ .legend { display: flex; }
+
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+
+  .swatch {
+    width: 11px; height: 11px; border-radius: 3px; display: inline-block;
+  }
+
+  .swatch.margin { background: var(--margin-color); }
+  .swatch.border { background: var(--border-color-demo); }
+  .swatch.padding { background: var(--padding-color); }
+  .swatch.content { background: var(--content-color); border: 1px solid var(--border); }
+
+  /* ================= SECTION 3: 3-COLUMN BLOG ================= */
+  .blog-demo {
+    display: flex;
+    gap: 18px;
+  }
+
+  .blog-demo .post {
+    flex: 1 1 0;
+    min-width: 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+  }
+
+  .blog-demo .post .tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    margin: 0 0 8px;
+  }
+
+  .blog-demo .post h4 {
+    margin: 0 0 8px;
+    font-size: 15px;
+  }
+
+  .blog-demo .post p {
+    margin: 0;
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  @media (max-width: 700px) {
+    .blog-demo {
+      flex-direction: column;
+    }
+  }
+
+  footer.foot {
+    text-align: center;
+    color: var(--muted);
+    font-size: 12.5px;
+    margin-top: 40px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="page-head">
+    <h1>Three layouts, three CSS tools</h1>
+    <p>A sidebar built with Flexbox, a product card built on the box model, and a three-column blog that collapses on mobile. Every panel below is live — resize the window or your phone's rotation to watch the breakpoints fire.</p>
+  </header>
+
+  <section class="lesson">
+    <p class="lesson-num">01</p>
+    <h2>Sidebar layout</h2>
+    <p class="intro">A fixed-width sidebar and a fluid main area, side by side with Flexbox. Under 560px the sidebar flattens into a horizontal strip so it doesn't eat the screen.</p>
+
+    <div class="sidebar-demo">
+      <nav class="side">
+        <div class="brand">Dashboard</div>
+        <a href="#" class="active">Overview</a>
+        <a href="#">Projects</a>
+        <a href="#">Settings</a>
+      </nav>
+      <div class="main">
+        <h3>Overview</h3>
+        <p>This is the main content area. It grows to fill whatever space the sidebar doesn't take, using <code>flex: 1 1 auto</code>.</p>
+      </div>
+    </div>
+    <p class="hint">resize below 560px wide to see the sidebar flatten</p>
+
+    <details class="code">
+      <summary>view CSS</summary>
+      <pre><span class="cm">/* container */</span>
+.sidebar-demo { display: flex; }
+
+<span class="cm">/* fixed-width sidebar, doesn't shrink */</span>
+.side { flex: 0 0 160px; }
+
+<span class="cm">/* main area takes remaining space */</span>
+.main { flex: 1 1 auto; }
+
+<span class="cm">/* stack on small screens */</span>
+@media (max-width: 560px) {
+  .sidebar-demo { flex-direction: column; }
+  .side { flex: 0 0 auto; display: flex; }
+}</pre>
+    </details>
+  </section>
+
+  <section class="lesson">
+    <p class="lesson-num">02</p>
+    <h2>Product card &amp; the box model</h2>
+    <p class="intro">Every element is content, wrapped in padding, wrapped in a border, wrapped in margin. Toggle the switch to see all three layers on the card below.</p>
+
+    <label class="box-model-toggle">
+      <input type="checkbox" id="box-toggle">
+      Show margin / border / padding
+    </label>
+
+    <div class="card-stage">
+      <div class="product-card">
+        <div class="thumb"></div>
+        <h4>Desk lamp</h4>
+        <p class="price">$42</p>
+        <button>Add to cart</button>
+      </div>
+    </div>
+    <div class="legend">
+      <span><i class="swatch margin"></i>margin</span>
+      <span><i class="swatch border"></i>border</span>
+      <span><i class="swatch padding"></i>padding</span>
+      <span><i class="swatch content"></i>content</span>
+    </div>
+
+    <details class="code">
+      <summary>view CSS</summary>
+      <pre>.product-card {
+  margin: 18px;    <span class="cm">/* space outside the border */</span>
+  border: 1px solid var(--border);
+  padding: 16px;   <span class="cm">/* space inside the border */</span>
+  border-radius: 10px;
+}
+<span class="cm">/* total width on screen = content + padding + border + margin */</span></pre>
+    </details>
+  </section>
+
+  <section class="lesson">
+    <p class="lesson-num">03</p>
+    <h2>Three-column blog layout</h2>
+    <p class="intro">Three equal-width posts with Flexbox, using <code>flex: 1 1 0</code> so they share space evenly. One media query collapses them to a single column under 700px.</p>
+
+    <div class="blog-demo">
+      <article class="post">
+        <p class="tag">CSS</p>
+        <h4>Flexbox basics</h4>
+        <p>How the main axis and cross axis decide where your content lands.</p>
+      </article>
+      <article class="post">
+        <p class="tag">Layout</p>
+        <h4>Grid vs Flexbox</h4>
+        <p>One dimension or two — picking the right tool for a layout.</p>
+      </article>
+      <article class="post">
+        <p class="tag">Responsive</p>
+        <h4>Writing media queries</h4>
+        <p>Breakpoints that follow the content, not a device list.</p>
+      </article>
+    </div>
+    <p class="hint">resize below 700px wide to see the columns stack</p>
+
+    <details class="code">
+      <summary>view CSS</summary>
+      <pre>.blog-demo { display: flex; gap: 18px; }
+
+.post {
+  flex: 1 1 0;   <span class="cm">/* grow, shrink, equal base width */</span>
+  min-width: 0;  <span class="cm">/* lets long words wrap instead of overflowing */</span>
+}
+
+@media (max-width: 700px) {
+  .blog-demo { flex-direction: column; }
+}</pre>
+    </details>
+  </section>
+
+  <footer class="foot">Resize the window to test every breakpoint — nothing here is a screenshot.</footer>
+
+</div>
+</body>
+</html>
